@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<struts-mapping>
+    <action name="login.do" class="com.cheea.action.LoginAction"></action>
+    <action name="getAll.do" class="com.cheea.action.GetUserByAdmin">
+      <forward name="success" path="admin.jsp" redirect="true"></forward>
+      <forward name="fail" path="fail.jsp" redirect="false"></forward>
+    </action>
+    <action name="up.do" class="com.cheea.action.UpUserByAdmin"></action>
+    <action name="down.do" class="com.cheea.action.DownUserByAdmin"></action>
+    <action name="delete.do" class="com.cheea.action.DeleteUserByAdmin"></action>
+    <action name="getstu.do" class="com.cheea.action.GetStudentByAdmin"></action>
+    <action name="getcal.do" class="com.cheea.action.GetClassByAdmin"></action>
+    <action name="gettea.do" class="com.cheea.action.GetTeacherByAdmin"></action>
+    <action name="getcou.do" class="com.cheea.action.GetCourseByAdmin"></action>
+    <action name="getrea.do" class="com.cheea.action.GetReadyClassByAdmin"></action>
+    <action name="getfal.do" class="com.cheea.action.GetFailClassByAdmin"></action>  
+    <action name="gettime.do" class="com.cheea.action.GetTimeByAdmin"></action>  
+    <action name="getxsl.do" class="com.cheea.action.GetXsl"></action>
+    <action name="getxls.do" class="com.cheea.action.GetXls"></action>
+    <action name="addStudent.do" class="com.cheea.action.AddStudentByAdmin"></action>
+    <action name="updateStudent.do" class="com.cheea.action.UpdateStudentByAdmin"></action>
+    <action name="deleteStudent.do" class="com.cheea.action.DeleteStudentByAdmin"></action>
+    <action name="addTeacher.do" class="com.cheea.action.AddTeacherByAdmin"></action>
+    <action name="updateTeacher.do" class="com.cheea.action.UpdateTeacherByAdmin"></action>
+    <action name="deleteTeacher.do" class="com.cheea.action.DeleteTeacherByAdmin"></action>
+    <action name="addClass.do" class="com.cheea.action.AddClassByAdmin"></action>
+    <action name="updateClass.do" class="com.cheea.action.UpdateClassByAdmin"></action>
+    <action name="deleteClass.do" class="com.cheea.action.DeleteClassByAdmin"></action>
+    <action name="addCourse.do" class="com.cheea.action.AddCourseByAdmin"></action>
+    <action name="updateCourse.do" class="com.cheea.action.UpdateCourseByAdmin"></action>
+    <action name="deleteCourse.do" class="com.cheea.action.DeleteCourseByAdmin"></action>
+    <action name="updateFail.do" class="com.cheea.action.UpdateFailByAdmin"></action>
+    <action name="updateReady.do" class="com.cheea.action.UpdateReadyByAdmin"></action>
+    <action name="doPaiKe.do" class="com.cheea.action.DoPaiKe"></action>
+    <action name="doClean.do" class="com.cheea.action.DoClean"></action>
+    <action name="search.do" class="com.cheea.action.SearchReadyByAdmin"></action>
+    <action name="exit.do" class="com.cheea.action.Exit">
+      <forward name="success" path="login.jsp" redirect="false"></forward>
+      <forward name="fail" path="error.jsp" redirect="false"></forward>
+    </action>
+    <action name="addUser.do" class="com.cheea.action.AddUserByAdmin">
+      <forward name="success" path="getAll.do" redirect="false"></forward>
+      <forward name="fail" path="error.jsp" redirect="false"></forward>
+    </action>
+</struts-mapping>
