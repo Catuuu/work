@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_ms_good_standard">
+    <!--获取ERP系统商品的多规格-->
+    <select id="getMsGoodStandards" resultType="CdsMsGoodStandard">
+        <![CDATA[
+
+            select s.*
+            from cds_ms_good_standard s
+            left join cds_ms_goods g on s.good_id = g.good_id
+            where g.status=1
+
+        ]]>
+    </select>
+
+
+    <!--获取平台商品信息-->
+    <select id="getGoodInfo" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+
+            select top 1 good_id,good_name,market_price
+            from cds_goods_info
+            where good_name = #{good_name}
+
+        ]]>
+    </select>
+
+    <select id="getErpGoods" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+
+             select ms.good_id ,gl.good_count,ms.good_name as class_good_name,ms.good_price,ms.class_id
+             from cds_erp_good_list gl
+             left join cds_ms_goods ms on gl.ms_good_id = ms.good_id
+             where gl.good_id = #{good_id}
+
+        ]]>
+    </select>
+
+    <select id="getErpNameGoods" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+
+             select mg.good_id,1 as good_count,mg.good_name as class_good_name,mg.good_price,class_id
+            from cds_ms_goods mg
+            where class_id=#{brand_id} and good_name=#{good_name}
+
+        ]]>
+    </select>
+
+    <select id="getStoresErpGoods" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select * from (
+            select sb.brand_id,good.stores_brand_id,
+                case when sl.standard_name is null or sl.standard_name='' then good.good_name else (good.good_name+'-'+sl.standard_name) end as good_standard_name,
+                ms.good_id,sgl.good_count,ms.good_name as class_good_name,ms.good_price,ms.class_id
+                from cds_standard_good_list sgl
+                left join cds_ms_goods ms on sgl.good_id = ms.good_id
+                left join cds_standard_list sl on sgl.standard_id = sl.standard_id
+                left join cds_stores_goods_list good on sl.sgl_id = good.sgl_id
+                left join cds_stores_brand sb on good.stores_brand_id = sb.stores_brand_id
+                where good.stores_id=#{stores_id}
+                and sb.brand_id=#{brand_id} ) temp
+                where temp.good_standard_name = #{good_name}
+
+        ]]>
+    </select>
+
+    <insert id="changeGoodTable">
+        <![CDATA[
+
+            insert into cds_ms_goods_list_history select * from cds_ms_goods_list where sale_time < CONVERT(varchar(100), GETDATE(), 23)
+
+        ]]>
+    </insert>
+
+    <delete id="deleteGoodTable">
+        <![CDATA[
+
+            delete from  cds_ms_goods_list where sale_time < CONVERT(varchar(100), GETDATE(), 23)
+
+        ]]>
+    </delete>
+</mapper>

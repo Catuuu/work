@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_home">
+
+    <!--获取得处理数量-->
+    <select id="getdoActionCount" parameterType="Map" resultType="HashMap">
+            select 'doCount1' as keyname,count(1) as docount
+            from cds_order_info o
+            where o.order_status = 0
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+            union all
+            select 'dopackCount' as keyname,count(1) as docount
+            from cds_order_info o
+            where (o.order_status = 1 or o.order_status = 2)  and o.pack_user_time is null
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+            union all
+            select 'dosendCount' as keyname, count(1) as docount
+            from cds_order_info o
+            where (o.order_status = 1 or o.order_status = 2) and o.pack_user_time is not null
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+            union all
+            select 'doCount3' as keyname,count(1) as docount
+            from cds_order_info o
+            where o.order_status = 3
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+            union all
+            select 'doCount4' as keyname,count(1) as docount
+            from cds_order_info o
+            where o.order_status = 4
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+            union all
+            select 'doCount99' as keyname,count(1) as docount
+            from cds_order_info o
+            where o.order_status = 99
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+            union all
+            select 'advanceCount' as keyname,count(1) as docount
+            from cds_order_info o
+            where (o.order_status = 1 or o.order_status = 2) and o.service_time is not null
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+            union all
+            select 'packExceptionCount' as keyname,count(1) as docount
+            from cds_order_info o
+            where (o.order_status = 1 or o.order_status = 2)  and  DATEDIFF(minute,o.create_date,o.pack_user_time) > 10
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+            union all
+            select 'sendExceptionCount' as keyname, count(1) as docount
+            from cds_order_info o
+            where (o.order_status = 1 or o.order_status = 2)
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND o.stores_id = #{stores_id} ]]>
+        </if>
+            and (DATEDIFF(minute,isnull(isnull(o.task_user_time,o.pack_user_time),o.create_date),o.task_time) >60
+            or (o.send_exception is not null and o.send_exception !='')
+            )
+            and o.create_date >= #{cur_date}
+            and o.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+
+    </select>
+
+
+    <!--获取订单数量数量-->
+    <select id="getdoOrderCount" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select fromin,sum(sum1) as sum1,sum(order_count) as sum2,sum(sum1)/sum(order_count) as sum3,sum(income) as income,'curser' as type
+            from (
+            select goods_prcie+ship_fee+box_price as sum1,income,fromin,1 as order_count from cds_order_info a
+            WHERE a.create_date >= #{cur_date} AND a.create_date <= #{cur_date} + ' 23:59:59'
+            and order_status !=99
+            and a.stores_id =#{stores_id}
+            ) temp
+            group by temp.fromin
+
+            union all
+            select fromin,sum(sum1) as sum1,sum(order_count) as sum2,sum(sum1)/sum(order_count) as sum3,sum(income) as income,'yesterday' as type
+            from (
+            select goods_prcie+ship_fee+box_price as sum1,income,fromin,1 as order_count from cds_order_info a
+            WHERE a.create_date >= #{yesterday} AND a.create_date <= #{yesterday} + ' 23:59:59'
+            and order_status !=99
+            and a.stores_id =#{stores_id}
+            ) temp
+            group by temp.fromin
+
+            union all
+            select fromin,sum(sum1) as sum1,sum(order_count) as sum2,sum(sum1)/sum(order_count) as sum3,sum(income) as income,'last_week' as type
+            from (
+            select goods_prcie+ship_fee+box_price as sum1,income,fromin,1 as order_count from cds_order_info a
+            WHERE a.create_date >= #{last_week} AND a.create_date <= #{last_week} + ' 23:59:59'
+            and order_status !=99
+            and a.stores_id =#{stores_id}
+            ) temp
+            group by temp.fromin
+        ]]>
+    </select>
+
+
+    <!--主页.商户数据-->
+    <select id="shop_data" parameterType="HashMap" resultType="HashMap">
+               select fromin,brand_id,
+                   sum(sum1)                                                                 AS sum1, --营业额
+                   sum(case when order_status != '99' then 1 else 0 end)                     AS sum2, --有效订单
+--                    sum(sum1) / sum(case when order_status != '99' then 1 else 0 end)         AS sum3, --客单价
+	               sum(case when order_status ='99' then 1 else 0 end)						 AS sum4, --无效订单
+	               sum(serviceFee)                                                           AS serviceFee,--平台服务费
+                   sum(income)                                                               AS income,--店铺收入
+                   sum(box_price)                                                            AS box_price, --餐盒费
+                   sum(ship_fee)                                                             AS ship_fee,--配送费
+                   sum(shop_part)                                                            AS shop_part,--店铺承担
+                   sum(platform_part)                                                        AS platform_part,--平台承担
+                   sum(deduction_price)                                                      AS deduction_price,--优惠金额
+                   sum(abs(uc_price))                                                        AS uc_price,--红包金额
+                   sum(total_price)                                                          AS total_price,--用户实付
+                   sum(goods_prcie)                                                          AS goods_prcie,--商品总价
+                   'curser' as type
+            from (
+            select goods_prcie+ship_fee+box_price as sum1,
+            income,fromin,order_status,brand_id,serviceFee,box_price,ship_fee,shop_part,platform_part
+            ,deduction_price,uc_price,total_price,goods_prcie
+            from cds_order_info a
+            WHERE a.create_date >= #{cur_date} AND a.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+
+            <if test="stores_id != null and stores_id != ''">
+                <![CDATA[ AND a.stores_id = #{stores_id} ]]>
+            </if>
+            ) temp
+            group by temp.fromin,brand_id
+
+            union all
+            select fromin,brand_id,
+                   sum(sum1)                                                                 AS sum1, --营业额
+                   sum(case when order_status != '99' then 1 else 0 end)                     AS sum2, --有效订单
+--                    sum(sum1) / sum(case when order_status != '99' then 1 else 0 end)         AS sum3, --客单价
+	               sum(case when order_status ='99' then 1 else 0 end)						 AS sum4, --无效订单
+	               sum(serviceFee)                                                           AS serviceFee,--平台服务费
+                   sum(income)                                                               AS income,--店铺收入
+                   sum(box_price)                                                            AS box_price, --餐盒费
+                   sum(ship_fee)                                                             AS ship_fee,--配送费
+                   sum(shop_part)                                                            AS shop_part,--店铺承担
+                   sum(platform_part)                                                        AS platform_part,--平台承担
+                   sum(deduction_price)                                                      AS deduction_price,--优惠金额
+                   sum(abs(uc_price))                                                        AS uc_price,--红包金额
+                   sum(total_price)                                                          AS total_price,--用户实付
+                   sum(goods_prcie)                                                          AS goods_prcie,--商品总价
+                   'curser' as type
+            from (
+            select goods_prcie+ship_fee+box_price as sum1,
+            income,fromin,order_status,brand_id,serviceFee,box_price,ship_fee,shop_part,platform_part
+            ,deduction_price,uc_price,total_price,goods_prcie
+            from view_cds_order_info a
+            WHERE a.create_date >= #{cur_date} AND a.create_date <![CDATA[<]]>= #{cur_date} + ' 23:59:59'
+
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND a.stores_id = #{stores_id} ]]>
+        </if>
+            ) temp
+            group by temp.fromin,brand_id
+
+            union all
+            select fromin,brand_id,
+                   sum(sum1)                                                                 AS sum1, --营业额
+                   sum(case when order_status != '99' then 1 else 0 end)                     AS sum2, --有效订单
+--                    sum(sum1) / sum(case when order_status != '99' then 1 else 0 end)         AS sum3, --客单价
+	               sum(case when order_status ='99' then 1 else 0 end)						 AS sum4, --无效订单
+	               sum(serviceFee)                                                           AS serviceFee,--平台服务费
+                   sum(income)                                                               AS income,--店铺收入
+                   sum(box_price)                                                            AS box_price, --餐盒费
+                   sum(ship_fee)                                                             AS ship_fee,--配送费
+                   sum(shop_part)                                                            AS shop_part,--店铺承担
+                   sum(platform_part)                                                        AS platform_part,--平台承担
+                   sum(deduction_price)                                                      AS deduction_price,--优惠金额
+                   sum(abs(uc_price))                                                        AS uc_price,--红包金额
+                   sum(total_price)                                                          AS total_price,--用户实付
+                   sum(goods_prcie)                                                          AS goods_prcie,--商品总价
+                   'yesterday' as type
+            from (
+            select goods_prcie+ship_fee+box_price as sum1,
+            income,fromin,order_status,brand_id,serviceFee,box_price,ship_fee,shop_part,platform_part
+            ,deduction_price,uc_price,total_price,goods_prcie
+            from cds_order_info a
+            WHERE a.create_date >= #{yesterday} AND a.create_date <![CDATA[<]]>= #{yesterday} + ' ' + convert(varchar(8),getdate(),114)
+
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND a.stores_id = #{stores_id} ]]>
+        </if>
+            ) temp
+            group by temp.fromin,brand_id
+
+            union all
+            select fromin,brand_id,
+                   sum(sum1)                                                                 AS sum1, --营业额
+                   sum(case when order_status != '99' then 1 else 0 end)                     AS sum2, --有效订单
+--                    sum(sum1) / sum(case when order_status != '99' then 1 else 0 end)         AS sum3, --客单价
+	               sum(case when order_status ='99' then 1 else 0 end)						 AS sum4, --无效订单
+	               sum(serviceFee)                                                           AS serviceFee,--平台服务费
+                   sum(income)                                                               AS income,--店铺收入
+                   sum(box_price)                                                            AS box_price, --餐盒费
+                   sum(ship_fee)                                                             AS ship_fee,--配送费
+                   sum(shop_part)                                                            AS shop_part,--店铺承担
+                   sum(platform_part)                                                        AS platform_part,--平台承担
+                   sum(deduction_price)                                                      AS deduction_price,--优惠金额
+                   sum(abs(uc_price))                                                        AS uc_price,--红包金额
+                   sum(total_price)                                                          AS total_price,--用户实付
+                   sum(goods_prcie)                                                          AS goods_prcie,--商品总价
+                   'yesterday' as type
+            from (
+            select goods_prcie+ship_fee+box_price as sum1,
+            income,fromin,order_status,brand_id,serviceFee,box_price,ship_fee,shop_part,platform_part
+            ,deduction_price,uc_price,total_price,goods_prcie
+            from view_cds_order_info a
+            WHERE a.create_date >= #{yesterday} AND a.create_date <![CDATA[<]]>= #{yesterday} + ' ' + convert(varchar(8),getdate(),114)
+
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND a.stores_id = #{stores_id} ]]>
+        </if>
+            ) temp
+            group by temp.fromin,brand_id
+
+            union all
+            select fromin,brand_id,
+                   sum(sum1)                                                                 AS sum1, --营业额
+                   sum(case when order_status != '99' then 1 else 0 end)                     AS sum2, --有效订单
+--                    sum(sum1) / sum(case when order_status != '99' then 1 else 0 end)         AS sum3, --客单价
+	               sum(case when order_status ='99' then 1 else 0 end)						 AS sum4, --无效订单
+	               sum(serviceFee)                                                           AS serviceFee,--平台服务费
+                   sum(income)                                                               AS income,--店铺收入
+                   sum(box_price)                                                            AS box_price, --餐盒费
+                   sum(ship_fee)                                                             AS ship_fee,--配送费
+                   sum(shop_part)                                                            AS shop_part,--店铺承担
+                   sum(platform_part)                                                        AS platform_part,--平台承担
+                   sum(deduction_price)                                                      AS deduction_price,--优惠金额
+                   sum(abs(uc_price))                                                        AS uc_price,--红包金额
+                   sum(total_price)                                                          AS total_price,--用户实付
+                   sum(goods_prcie)                                                          AS goods_prcie,--商品总价
+                   'last_week' as type
+            from (
+            select goods_prcie+ship_fee+box_price as sum1,
+            income,fromin,order_status,brand_id,serviceFee,box_price,ship_fee,shop_part,platform_part
+            ,deduction_price,uc_price,total_price,goods_prcie
+            from view_cds_order_info a
+            WHERE a.create_date >= #{last_week} AND a.create_date <![CDATA[<]]>= #{last_week} + ' ' + convert(varchar(8),getdate(),114)
+
+        <if test="stores_id != null and stores_id != ''">
+            <![CDATA[ AND a.stores_id = #{stores_id} ]]>
+        </if>
+            ) temp
+            group by temp.fromin,brand_id
+    </select>
+
+
+    <!--异常订单列表-->
+    <select id="exception_order_list"  parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select
+            DATEDIFF(minute,o.create_date,o.pack_user_time)   as pack_time,
+            DATEDIFF(minute,o.create_date,getdate()) as pack_wait_time,
+            DATEDIFF(minute,isnull(o.pack_user_time,o.create_date),o.task_user_time) as takemea_time,
+            DATEDIFF(minute,isnull(o.pack_user_time,o.create_date),getdate()) as takemea_wait_time,
+            DATEDIFF(minute,isnull(o.task_order_time,o.create_date),o.task_time) as use_send_time,
+            DATEDIFF(minute,isnull(isnull(o.task_user_time,o.pack_user_time),o.create_date),getdate()) as use_send_wait_time,
+            s.name stores_name,
+            b.brand_name,
+            o.*
+            from cds_order_info o
+            left join cds_stores s on o.stores_id = s.stores_id
+            left join cds_brand b on o.brand_id = b.brand_id
+        ]]>
+        <where>
+            <if test="formInfo.sl_date_begin != null and formInfo.sl_date_begin != '' ">
+                <![CDATA[ o.create_date >= #{formInfo.sl_date_begin} ]]>
+            </if>
+            <if test="formInfo.sl_date_end != null and formInfo.sl_date_end != '' ">
+                <![CDATA[ AND o.create_date <= #{formInfo.sl_date_end} + ' 23:59:59'  ]]>
+            </if>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[ AND o.stores_id = #{formInfo.stores_id} ]]>
+            </if>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' and formInfo.brand_id != 0">
+                <![CDATA[ AND o.brand_id = #{formInfo.brand_id} ]]>
+            </if>
+            <choose>
+                <when test='formInfo.cur_status !=null and formInfo.cur_status == "1"'>
+                    and (o.order_status = 1 or o.order_status = 2) and o.service_time is not null
+                </when>
+                <when test='formInfo.cur_status !=null and formInfo.cur_status == "2"'>
+                    and (o.order_status = 1 or o.order_status = 2)  and  DATEDIFF(minute,o.create_date,o.pack_user_time) > 10
+                </when>
+                <when test='formInfo.cur_status !=null and formInfo.cur_status == "3"'>
+                    and (o.order_status = 1 or o.order_status = 2)
+                    and (DATEDIFF(minute,isnull(isnull(o.task_user_time,o.pack_user_time),o.create_date),o.task_time) >60
+                    or (o.send_exception is not null and o.send_exception !='')
+                    )
+                </when>
+                <otherwise>
+
+                </otherwise>
+            </choose>
+
+        </where>
+    </select>
+
+</mapper>

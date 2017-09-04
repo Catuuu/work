@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_chufan_xiada">
+    <!--获取商铺下达的商品-->
+    <select id="getStoresGood" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select cmg_id,cm_id,ct_num,good_id,good_name,sum_count,already_count,poccess_count,
+            (case when (already_count-pack_count)>0 then (already_count-pack_count) else 0 end)  as repertory_count
+             from (
+            select cmg.cmg_id,cm.cm_id,cm.ct_num,cmg.good_id,mg.good_name,
+            (select isnull(sum(count),0) from cds_ms_goods_list where good_id= cmg.good_id and stores_id=#{stores_id} and sale_time>CONVERT(varchar(100), GETDATE(), 23)) as sum_count,
+            (select isnull(sum(finsh_count),0) from cds_goods_task where good_id= cmg.good_id and stores_id=#{stores_id} and task_status in (1,2) and createtime>CONVERT(varchar(100), GETDATE(), 23)) as already_count,
+            (select isnull(sum(good_count),0)-isnull(sum(finsh_count),0) from cds_goods_task where good_id= cmg.good_id  and task_status in (1,2) and stores_id=cm.stores_id and createtime>CONVERT(varchar(100), GETDATE(), 23)) as poccess_count,
+            (select isnull(sum(count),0) from cds_ms_goods_list where good_id= cmg.good_id and stores_id=cm.stores_id and sale_time>CONVERT(varchar(100), GETDATE(), 23) and pack_time is not null) as pack_count
+            from cds_chufan_meal_goods cmg
+            left join cds_chufan_meal cm on cmg.cm_id = cm.cm_id
+            left join cds_ms_goods mg on cmg.good_id = mg.good_id
+            where cm.stores_id=#{stores_id}
+            and cm.status=1
+            )temp
+            order by ct_num,good_name
+        ]]>
+    </select>
+
+    <select id="getStoresGood2" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select cmg_id,cm_id,ct_num,good_id,good_name,sum_count,already_count,poccess_count,(already_count-pack_count) as repertory_count
+             from (
+            select cmg.cmg_id,cm.cm_id,cm.ct_num,cmg.good_id,mg.good_name,
+            (select isnull(sum(count),0) from cds_ms_goods_list where good_id= cmg.good_id and stores_id=cm.stores_id and sale_time>CONVERT(varchar(100), GETDATE(), 23)) as sum_count,
+            (select isnull(sum(finsh_count),0) from cds_goods_task where good_id= cmg.good_id and stores_id=cm.stores_id and task_status in (1,2) and createtime>CONVERT(varchar(100), GETDATE(), 23)) as already_count,
+            (select isnull(sum(good_count),0)-isnull(sum(finsh_count),0) from cds_goods_task where good_id= cmg.good_id  and task_status in (1,2) and stores_id=cm.stores_id and createtime>CONVERT(varchar(100), GETDATE(), 23)) as poccess_count,
+            (select isnull(sum(count),0) from cds_ms_goods_list where good_id= cmg.good_id and stores_id=cm.stores_id and sale_time>CONVERT(varchar(100), GETDATE(), 23) and pack_time is not null) as pack_count
+            from cds_chufan_meal_goods cmg
+            left join cds_chufan_meal cm on cmg.cm_id = cm.cm_id
+            left join cds_ms_goods mg on cmg.good_id = mg.good_id
+            where cm.stores_id=#{stores_id}
+            and cm.status=1
+            )temp
+            order by ct_num,good_name
+        ]]>
+    </select>
+
+    <!--创建调度下达记录-->
+    <insert id="insertRecord" parameterType="CdsGoodsTask">
+        <![CDATA[
+            INSERT INTO cds_goods_task(
+                task_id,
+                task_num,
+                meal_num,
+                stores_id,
+                good_id,
+                good_name,
+                good_count,
+                finsh_count,
+                createtime,
+                task_status,
+                es_id,
+                cm_id
+            ) VALUES(
+                #{task_id},
+                (select COUNT(1)+1 from cds_goods_task where stores_id = ${stores_id} and createtime>CONVERT(varchar(100), GETDATE(), 23)),
+                (select COUNT(1)+1 from cds_goods_task where cm_id = ${cm_id} and createtime>CONVERT(varchar(100), GETDATE(), 23)),
+                #{stores_id},
+                #{good_id},
+                #{good_name},
+                #{good_count},
+                #{finsh_count},
+                #{createtime},
+                #{task_status},
+                #{es_id},
+                #{cm_id}
+            )
+        ]]>
+    </insert>
+
+
+    <!--获取生产中任务-->
+    <select id="getProductionList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+           select cgt.*,ccm.ct_num,cmg.finished_weight
+            from cds_goods_task cgt
+            left join cds_chufan_meal ccm on cgt.cm_id = ccm.cm_id
+            left join cds_ms_goods cmg on cgt.good_id = cmg.good_id
+            where cgt.createtime>CONVERT(varchar(100), GETDATE(), 23)
+            and cgt.stores_id=#{stores_id}
+            and cgt.task_status = 1
+            order by task_num desc
+        ]]>
+    </select>
+
+    <!--获取操作记录-->
+    <select id="recordList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select cgt.*,ccm.ct_num from cds_goods_task cgt
+            left join cds_chufan_meal ccm on cgt.cm_id = ccm.cm_id
+            where cgt.createtime>CONVERT(varchar(100), GETDATE(), 23)
+            and cgt.stores_id=#{stores_id}
+            order by task_num desc
+        ]]>
+    </select>
+
+
+
+    <!--获取操作记录明细-->
+    <select id="taskrecordList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select cm.ct_num,cgt.meal_num,cgt.task_num,isnull(ms.finished_weight,0) as finished_weight,gtr.*
+            from cds_goods_task_record gtr
+            left join cds_chufan_meal cm on gtr.cm_id = cm.cm_id
+            left join cds_goods_task cgt on cgt.task_id = gtr.task_id
+			left join cds_ms_goods ms on gtr.good_id = ms.good_id
+			where gtr.task_id=#{task_id}
+            order by gtr.createtime
+        ]]>
+    </select>
+
+
+    <!--获取出餐机信息-->
+    <select id="getChufanMealList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select ct_num,cm_name
+            from cds_chufan_meal cm
+            where cm.stores_id=#{stores_id}
+            and cm.status = 1
+            order by ct_num
+        ]]>
+    </select>
+
+
+
+    <!--报表数据查看-->
+    <select id="reportList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select mg.good_name,
+            (select isnull(sum(count),0) from cds_ms_goods_list where good_id= cmg.good_id and stores_id=#{stores_id} and sale_time>CONVERT(varchar(100), GETDATE(), 23)) as count1,
+            (select isnull(sum(finsh_count),0) from cds_goods_task where good_id= cmg.good_id and stores_id=#{stores_id} and task_status in (1,2) and createtime>CONVERT(varchar(100), GETDATE(), 23)) as count2,
+            (select isnull(sum(good_count),0)-isnull(sum(finsh_count),0) from cds_goods_task where good_id= cmg.good_id  and task_status in (1,2) and stores_id=#{stores_id} and createtime>CONVERT(varchar(100), GETDATE(), 23)) as count3
+            from cds_chufan_meal_goods cmg
+            left join cds_chufan_meal cm on cmg.cm_id = cm.cm_id
+            left join cds_ms_goods mg on cmg.good_id = mg.good_id
+            where cm.stores_id=#{stores_id}
+            and cm.status=1
+            order by good_name desc
+        ]]>
+    </select>
+</mapper>

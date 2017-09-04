@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:amq="http://www.springframework.org/schema/c"
+       xmlns:jms="http://www.springframework.org/schema/p" xmlns:task="http://www.springframework.org/schema/task"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize"><value>1000000</value></property>
+        <property name="defaultEncoding"><value>UTF-8</value></property>
+    </bean>
+
+    <!--spring 扫描路径-->
+    <context:component-scan base-package="com.framework,com.controller,com.api,com.service,com.quartzJob,com.jms" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Component"/>
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+    </context:component-scan>
+
+    <!--视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="order" value="4"/>
+     </bean>
+
+    <!--spring 线程池-->
+    <bean id ="taskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor" >
+        <property name ="corePoolSize" value ="5" />
+        <property name ="keepAliveSeconds" value ="300" />
+        <property name ="maxPoolSize" value ="50" />
+        <property name ="queueCapacity" value ="25" />
+    </bean>
+
+
+    <!--spring异常处理-->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="defaultErrorView">
+            <value>/error/error</value>
+        </property>
+        <property name="defaultStatusCode">
+            <value>500</value>
+        </property>
+        <property name="warnLogCategory">
+            <value>org.springframework.web.servlet.handler.SimpleMappingExceptionResolver</value>
+        </property>
+    </bean>
+
+    <!-- 开启事务注解驱动 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!--启用@AspectJ支持-->
+    <aop:aspectj-autoproxy/>
+
+    <aop:aspectj-autoproxy proxy-target-class="true" />
+    <!--<mvc:annotation-driven />-->
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+        <property name="interceptors">
+            <list>
+                <!--spring上下文绑定拦截器-->
+                <bean class="com.framework.inteceptor.RequestHelperInteceptor"/>
+                <!--登录及权限验证拦截器-->
+                <bean class="com.framework.inteceptor.LoginAndRightCheckInterceptor"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <util:list >
+                <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                    <property name="writeAcceptCharset" value="false"/>
+                </bean>
+                <bean class="org.springframework.http.converter.xml.SourceHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                    <property name="objectMapper">
+                        <bean class="com.framework.databind.XhrjObjectMapper"/>
+                    </property>
+                </bean>
+            </util:list>
+        </property>
+
+        <property name="webBindingInitializer">
+            <bean class="com.framework.databind.XhrjBindingInitializer"/>
+        </property>
+    </bean>
+
+    <!--静态资源访问默认的Servlet-->
+    <mvc:default-servlet-handler/>
+
+
+    <!--Quartz启用注解的计划任务-->
+    <task:annotation-driven/>
+
+
+</beans>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_brand">
+    <!--获取商铺信息-->
+    <select id="getStores" parameterType="Integer" resultType="CdsStores">
+        <![CDATA[
+            select brand.stores_brand_id,brand.brand_id,stores.stores_id,brand.stores_name as name,
+            brand.dispatch_extinfo,
+            service_phone as linkman,address,
+            elem_restaurant_id,
+            meituan_restaurant_id,
+            brand.baidu_restaurant_id,
+            points,pickup_time,complete_time,b.brand_fromno_start
+            from cds_stores stores
+            left join cds_stores_brand brand on stores.stores_id = brand.stores_id
+            left join cds_brand b on brand.brand_id=b.brand_id
+            where brand.stores_brand_id=#{stores_brand_id}
+        ]]>
+    </select>
+
+    <!--获取商铺信息-->
+    <select id="getBrandStores" parameterType="Map" resultType="CdsStores">
+        <![CDATA[
+            select brand.stores_brand_id,brand.brand_id,stores.stores_id,brand.stores_name as name,
+            brand.dispatch_extinfo,
+            service_phone as linkman,address,
+            elem_restaurant_id,
+            meituan_restaurant_id,
+            brand.baidu_restaurant_id,
+            points,pickup_time,complete_time,b.brand_fromno_start
+            from cds_stores stores
+            left join cds_stores_brand brand on stores.stores_id = brand.stores_id
+            left join cds_brand b on brand.brand_id=b.brand_id
+            where brand.brand_id=#{brand_id} and stores.stores_id=#{stores_id}
+        ]]>
+    </select>
+</mapper>

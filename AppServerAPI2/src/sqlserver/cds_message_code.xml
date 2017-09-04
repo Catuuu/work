@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_message_code">
+
+    <!-- 添加短信信息 开始 -->
+    <insert id="saveEntity" parameterType="CdsMessageCode">
+        insert into cds_message_code
+        <!-- 添加表字段 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="member_id != null and member_id != '' ">member_id,</if>
+            <if test="mc_mobile != null and mc_mobile != '' ">mc_mobile,</if>
+            <if test="mc_date != null and mc_date != '' ">mc_date,</if>
+            <if test="mc_addip != null and mc_addip != '' ">mc_addip,</if>
+            <if test="mc_type != null and mc_type != '' ">mc_type,</if>
+            <if test="mc_content != null and mc_content != '' ">mc_content,</if>
+            <if test="mc_code != null and mc_code != '' ">mc_code,</if>
+            <if test="isuse != null and isuse != '' ">isuse,</if>
+            <if test="mc_checktime != null and mc_checktime != '' ">mc_checktime,</if>
+        </trim>
+        <!-- 注入控制层字段 -->
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="member_id != null and member_id != ''">#{member_id},</if>
+            <if test="mc_mobile != null and mc_mobile != ''">#{mc_mobile,jdbcType=VARCHAR},</if>
+            <if test="mc_date != null and mc_date != ''">#{mc_date},</if>
+            <if test="mc_addip != null and mc_addip != ''">#{mc_addip},</if>
+            <if test="mc_type != null  and mc_type != '' ">#{mc_type},</if>
+            <if test="mc_content != null  and mc_content != '' ">#{mc_content,jdbcType=VARCHAR},</if>
+            <if test="mc_code != null and mc_code != '' ">#{mc_code},</if>
+            <if test="isuse != null and isuse != '' ">#{isuse},</if>
+            <if test="mc_checktime != null and mc_checktime != '' ">#{mc_checktime},</if>
+        </trim>
+    </insert>
+    <!-- 添加短信信息 结束 -->
+
+    <select id="getRecords"  resultType="HashMap">
+        <![CDATA[
+            select mem.phone as rec_tel
+             from cds_member_stores m
+            left join cds_stores s on m.stores_id = s.stores_id
+            left join cds_member mem  on m.member_id = mem.member_id
+             where m.last_order_time>'2017-01-20' and m.last_order_time<'2017-02-21'
+             and m.stores_id not in (9,11)
+             and mem.phone not in(select mc_mobile from cds_message_code where mc_type=9 and mc_date>'2017-03-22')
+        ]]>
+    </select>
+
+    <!--钟家村、范湖所有用户-->
+    <select id="getRecords2"  resultType="HashMap">
+        <![CDATA[
+            select mem.phone as rec_tel
+             from cds_member_stores m
+            left join cds_stores s on m.stores_id = s.stores_id
+            left join cds_member mem  on m.member_id = mem.member_id
+             where  m.stores_id  in (15,16)
+             and mem.phone not in(select mc_mobile from cds_message_code where mc_type=9 and mc_date>'2017-03-25')
+        ]]>
+    </select>
+    <!--水岸国际所有用户-->
+    <select id="getRecords3"  resultType="HashMap">
+        <![CDATA[
+             select distinct rec_tel from cds_sh_order
+            where isdo=1 and owner_stores_id like '%17,%'
+            and rec_tel not in(select mc_mobile from cds_message_code where mc_type=9 and mc_date>'2017-04-01')
+        ]]>
+    </select>
+
+    <!--沉默用户-->
+    <select id="getRecords4"  resultType="HashMap">
+        <![CDATA[
+            select  distinct phone as rec_tel from (
+            select s.name,ms.member_id,ms.last_order_time,
+            (select count(1) from view_cds_order_info a where a.member_id = ms.member_id and a.create_date<'2017-06-20' and a.create_date>'2017-05-21' and a.fromin='美团'  and a.stores_id=s.stores_id  )  order_count,
+            mem.phone
+            from cds_member_stores ms
+            left join cds_member mem on ms.member_id = mem.member_id
+            left join cds_stores s on ms.stores_id = s.stores_id
+            where ms.last_order_time <'2017-06-20' and ms.last_order_time>'2017-05-21' and ms.stores_id in (11)
+			) temp
+            where order_count>2
+        ]]>
+    </select>
+
+    <!--活跃用户-->
+    <select id="getRecords5"  resultType="HashMap">
+        <![CDATA[
+            select  distinct phone as rec_tel from (
+            select s.name,ms.member_id,ms.last_order_time,
+            (select count(1) from view_cds_order_info a where a.member_id = ms.member_id and a.create_date<'2017-07-10 23:59' and a.create_date>'2017-06-10'  and a.stores_id=s.stores_id  )  order_count,
+            mem.phone
+            from cds_member_stores ms
+            left join cds_member mem on ms.member_id = mem.member_id
+            left join cds_stores s on ms.stores_id = s.stores_id
+            where ms.last_order_time <'2017-07-10 23:59' and ms.last_order_time>'2017-06-10'
+			) temp
+            where order_count>2
+        ]]>
+    </select>
+
+
+
+</mapper>

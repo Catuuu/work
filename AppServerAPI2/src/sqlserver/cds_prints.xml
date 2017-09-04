@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_prints">
+    <!--用户管理分页数据查询-->
+    <select id="getPageRecord" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select b.brand_name,s.name,p.* from cds_prints p
+            left join cds_brand b on p.brand_id = b.brand_id
+            left join cds_stores s on p.stores_id = s.stores_id
+        ]]>
+        <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+            where p.stores_id = #{formInfo.stores_id}
+        </if>
+    </select>
+
+    <!--查询需要补单的定单信息-->
+    <select id="getPrintOrder" parameterType="Map" resultType="CdsOrderInfo">
+        <![CDATA[
+            select top 1 * from cds_order_info
+            where stores_id = #{stores_id}
+            and create_date >= #{day}
+            and create_date <= #{day} + ' 23:59:59'
+            and order_no LIKE '%'+#{order_no}
+        ]]>
+    </select>
+
+
+</mapper>

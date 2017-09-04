@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_printer">
+    <!--打印机管理列表-->
+    <select id="getChuFanMeal" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from cds_chufan_meal
+            where stores_id = #{formInfo.stores_id}
+        ]]>
+    </select>
+
+    <!--打印机对应商品管理列表-->
+    <select id="getChuFanGoods" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select a.cmg_id,b.good_id,b.good_name,b.good_num,b.good_key,c.cm_name from cds_chufan_meal_goods a  left join cds_ms_goods  b on a.good_id = b.good_id
+            left join cds_chufan_meal c on a.cm_id = c.cm_id
+        ]]>
+        <where>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[
+                        AND (
+                             c.stores_id = #{formInfo.stores_id}
+                          )
+                    ]]>
+            </if>
+            <if test="formInfo.cm_id != null and formInfo.cm_id != '' ">
+                <![CDATA[
+                        AND (
+                             a.cm_id = #{formInfo.cm_id}
+                          )
+                    ]]>
+            </if>
+            <if test="formInfo.good_num != null and formInfo.good_num != '' ">
+                <![CDATA[
+                        AND (
+                             b.good_num LIKE '%'+#{formInfo.good_num}+'%'
+                          )
+                    ]]>
+            </if>
+            <if test="formInfo.good_name != null and formInfo.good_name != '' ">
+                <![CDATA[
+                        AND (
+                            b.good_name LIKE '%'+#{formInfo.good_name}+'%' OR
+                            b.pinxin LIKE '%'+#{formInfo.good_name}+'%'
+                          )
+                    ]]>
+            </if>
+        </where>
+    </select>
+
+    <!--打印机对应商品管理列表-->
+    <select id="getErpGoods" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+             select * from cds_ms_goods where good_id not in(select b.good_id from cds_chufan_meal_goods a  left join cds_ms_goods  b on a.good_id = b.good_id
+            left join cds_chufan_meal c on a.cm_id = c.cm_id
+            where c.stores_id=#{formInfo.stores_id})
+        ]]>
+            <if test="formInfo.good_num != null and formInfo.good_num != '' ">
+                <![CDATA[
+                        AND (
+                             good_num LIKE '%'+#{formInfo.good_num}+'%'
+                          )
+                    ]]>
+            </if>
+            <if test="formInfo.good_name != null and formInfo.good_name != '' ">
+                <![CDATA[
+                        AND (
+                            good_name LIKE '%'+#{formInfo.good_name}+'%' OR
+                            pinxin LIKE '%'+#{formInfo.good_name}+'%'
+                          )
+                    ]]>
+            </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_comment">
+    <!--门店分类-->
+    <select id="shops" parameterType="HashMap" resultType="CdsStoresBrand">
+     select b.brand_name,sb.stores_name,sb.brand_id,sb.stores_id,sb.elem_restaurant_id,sb.stores_brand_id from cds_stores_brand sb
+     left join cds_brand b on sb.brand_id = b.brand_id
+    </select>
+
+    <select id="getCommentList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+                  select * from cds_fromin_comments fc
+         ]]>
+        <where>
+            <if test="formInfo.sl_date_begin != null and formInfo.sl_date_begin != '' ">
+                <![CDATA[ fc.create_time >= #{formInfo.sl_date_begin} ]]>
+            </if>
+            <if test="formInfo.sl_date_end != null and formInfo.sl_date_end != '' ">
+                <![CDATA[ AND fc.create_time <= #{formInfo.sl_date_end} + ' 23:59:59'  ]]>
+            </if>
+            <if test="formInfo.rating != null and formInfo.rating == 1 ">
+                <![CDATA[ AND fc.rating in (1,2,3) ]]>
+            </if>
+            <if test="formInfo.rating != null and formInfo.rating == 2 ">
+                <![CDATA[ AND fc.rating in (4,5) ]]>
+            </if>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[ AND fc.stores_id = #{formInfo.stores_id}  ]]>
+            </if>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' ">
+                <![CDATA[ AND fc.brand_id = #{formInfo.brand_id}  ]]>
+            </if>
+            <if test="formInfo.fromin != null and formInfo.fromin != '' ">
+                <![CDATA[ AND fc.fromin = #{formInfo.fromin}  ]]>
+            </if>
+            <if test="formInfo.keywords != null and formInfo.keywords != '' ">
+                <![CDATA[
+                    AND (
+                        o.order_id LIKE '%'+#{formInfo.keywords}+'%' OR
+                        o.order_no LIKE '%'+#{formInfo.keywords}+'%' OR
+                        o.order_desc LIKE '%'+#{formInfo.keywords}+'%' OR
+                        o.fromin_no LIKE '%'+#{formInfo.keywords}+'%' OR
+                        o.receiver_name LIKE '%'+#{formInfo.keywords}+'%' OR
+                        o.receiver_phone LIKE '%'+#{formInfo.keywords}+'%' OR
+                        o.receiver_adress LIKE '%'+#{formInfo.keywords}+'%' OR
+                        o.task_user_phone LIKE '%'+#{formInfo.keywords}+'%'
+                      )
+                ]]>
+            </if>
+            <choose>
+                <when test='formInfo.cur_fromin !=null and formInfo.cur_fromin == "1"'>
+                    AND o.fromin = '饿了么'
+                </when>
+                <when test='formInfo.cur_fromin !=null and formInfo.cur_fromin == "2"'>
+                    AND o.fromin = '美团'
+                </when>
+                <when test='formInfo.cur_fromin !=null and formInfo.cur_fromin == "3"'>
+                    AND o.fromin = '百度外卖'
+                </when>
+
+                <when test='formInfo.cur_fromin !=null and formInfo.cur_fromin == "4"'>
+                    AND o.fromin = '微信'
+                </when>
+            </choose>
+        </where>
+    </select>
+
+</mapper>

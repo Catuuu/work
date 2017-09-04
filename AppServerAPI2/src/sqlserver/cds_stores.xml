@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_stores">
+    <!--cds_brand品牌表数据列表-->
+    <select id="getPageRecord" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from  cds_brand
+        ]]>
+    </select>
+    <!--cds_stores_brand门店品牌明细列表-->
+    <select id="getStoresBrand" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from cds_stores_brand
+        ]]>
+    </select>
+    <!--cds_stores_brand门店品牌明细列表-->
+    <select id="getStoresBrand2" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from cds_stores_brand where stores_id = #{formInfo.stores_id}
+        ]]>
+    </select>
+
+    <!--cds_stores查询门店信息-->
+    <select id="getStores" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from cds_stores where stores_id = #{stores_id}
+        ]]>
+    </select>
+    <!-- cds_stores_brand重新绑定修改绑定id-->
+    <select id="updateStoresBrand" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            update cds_stores_brand set  elem_restaurant_id =null where elem_restaurant_id=#{elem_restaurant_id}
+        ]]>
+    </select>
+    <select id="updateStoresBrand2" parameterType="CdsStoresBrand" resultType="HashMap">
+        <![CDATA[
+            update cds_stores_brand set  elem_restaurant_id =#{elem_restaurant_id} where stores_brand_id=#{stores_brand_id}
+        ]]>
+    </select>
+    <!--cds_stores_login打包客户端配置列表-->
+    <select id="getStoresLoginPageRecord" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from  cds_stores_login
+        ]]>
+        <where>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[ stores_id = #{formInfo.stores_id} ]]>
+            </if>
+            <if test="formInfo.username != null and formInfo.username != '' ">
+                <![CDATA[
+                    AND (
+                        username LIKE '%'+#{formInfo.username}+'%'
+                      )
+                ]]>
+            </if>
+        </where>
+    </select>
+
+    <!--cds_ms_goods  ERP商品管理列表-->
+    <select id="getMsGoodsPageRecord" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from  cds_ms_goods
+        ]]>
+        <where>
+            <if test="formInfo.status != null and formInfo.status != '' ">
+                <![CDATA[ status = #{formInfo.status} ]]>
+            </if>
+            <if test="formInfo.class_id != null and formInfo.class_id != '' ">
+                <![CDATA[
+                    AND (
+                         class_id = #{formInfo.class_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.good_name != null and formInfo.good_name != '' ">
+                <![CDATA[
+                    AND (
+                        good_name LIKE '%'+#{formInfo.good_name}+'%' OR
+                        pinxin LIKE '%'+#{formInfo.good_name}+'%'
+                      )
+                ]]>
+            </if>
+        </where>
+    </select>
+
+    <!--cds_users管理员（员工）列表-->
+    <select id="getUserList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from  cds_users
+        ]]>
+        <where>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[ stores_id = #{formInfo.stores_id} ]]>
+            </if>
+            <if test="formInfo.sex != null and formInfo.sex != '' ">
+                <![CDATA[
+                    AND (
+                        sex = #{formInfo.sex}
+                        )
+                ]]>
+            </if>
+            <if test="formInfo.user_login != null and formInfo.user_login != '' ">
+                <![CDATA[
+                    AND (
+                        user_login LIKE '%'+#{formInfo.user_login}+'%'
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.user_nicename != null and formInfo.user_nicename != '' ">
+                <![CDATA[
+                    AND (
+                        user_nicename LIKE '%'+#{formInfo.user_nicename}+'%'
+                      )
+                ]]>
+            </if>
+        </where>
+    </select>
+    <!--查询数据库最大的商品编码-->
+    <select id="queryGoodNum" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select  max(good_num) from cds_ms_goods
+        ]]>
+    </select>
+
+    <!-- 平台商品信息列表-->
+    <select id="GetGoodsInfoLists" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select a.* ,c.brand_id,
+                (select count(1) from cds_erp_good_list b where b.good_id=a.good_id) as good_count
+                from cds_goods_info a
+                left join cds_class c on c.class_id=a.class_id
+        ]]>
+        <where>
+            <if test="formInfo.status != null and formInfo.status != '' ">
+                <![CDATA[ a.status = #{formInfo.status} ]]>
+            </if>
+            <if test="formInfo.class_id != null and formInfo.class_id != '' ">
+                <![CDATA[
+                    AND (
+                         a.class_id = #{formInfo.class_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' ">
+                <![CDATA[
+                    AND (
+                         c.brand_id = #{formInfo.brand_id}
+                      )
+                ]]>
+            </if>
+
+            <if test="formInfo.good_name != null and formInfo.good_name != '' ">
+                <![CDATA[
+                    AND (
+                        a.good_name LIKE '%'+#{formInfo.good_name}+'%' OR
+                        a.pinxin LIKE '%'+#{formInfo.good_name}+'%'
+                      )
+                ]]>
+            </if>
+
+            <if test="formInfo.good_ids != null and formInfo.good_ids != '' ">
+                <![CDATA[
+                     ${formInfo.good_ids}
+                ]]>
+            </if>
+            <if test="formInfo.class_ids != null and formInfo.class_ids != '' ">
+                <![CDATA[
+                     ${formInfo.class_ids}
+                ]]>
+            </if>
+        </where>
+    </select>
+
+    <!--平台商品对应的erp菜品列表-->
+    <select id="GetGoodsInfoErp" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+               select
+                a.erp_good_id,
+                m.good_id,
+                c.class_nick_name,
+                t.class_id,
+                m.good_name,
+                a.good_count
+                from cds_erp_good_list a
+                left join cds_ms_goods m on a.ms_good_id=m.good_id
+                left join cds_goods_info g on a.good_id = g.good_id
+                left join cds_class c on c.class_id = g.class_id
+                left join cds_class_type t on m.class_id = t.class_id
+                where a.good_id=#{good_id}
+        ]]>
+    </select>
+
+    <!--cds_erp_good_list 根据商品id批量删除对应Erp商品明细-->
+    <select id="deleteErpGoodList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            DELETE  from cds_erp_good_list where good_id = #{good_id}
+        ]]>
+    </select>
+
+    <!-- 平台商品类别信息列表-->
+    <select id="GetGoodsClassLists" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from  cds_class
+        ]]>
+        <where>
+            <if test="formInfo.class_name != null and formInfo.class_name != '' ">
+                <![CDATA[ class_name LIKE '%'+#{formInfo.class_name}+'%' ]]>
+            </if>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' ">
+                <![CDATA[
+                    AND (
+                         brand_id = #{formInfo.brand_id}
+                      )
+                ]]>
+            </if>
+        </where>
+    </select>
+
+
+    <!--查询有商铺的城市-->
+    <select id="getCity" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select * from cds_area
+              where id in (select distinct city from cds_stores )
+        ]]>
+    </select>
+
+    <!--返回所有店铺id-->
+    <select id="orderOnTimeStores" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select stores_id storesId,name storesName,charge_type chargeType from cds_stores
+        ]]>
+        <where>
+            <if test="stores_id != null and stores_id != '' ">
+                <![CDATA[ stores_id = #{stores_id} ]]>
+            </if>
+        </where>
+        order by stores_id
+    </select>
+
+
+
+    <select id="easyTitleName1" parameterType="Map" resultType="HashMap">
+        select stores_id storesId,
+        (select name from cds_stores s where s.stores_id = o.stores_id) storesName,
+        count(pack_user_name) peopleCount from
+        (
+        select stores_id,pack_user_name from
+         cds_order_info where
+        pack_user_name is not null
+        <if test="startday !=null and startday!=''">
+            AND create_date > #{startday}
+            AND create_date <![CDATA[<]]> #{endday} + ' 23:59:59'
+        </if>
+        <if test="stores_id != null and stores_id != '' ">
+            AND <![CDATA[ stores_id = #{stores_id} ]]>
+        </if>
+         and pack_user_name is not null
+         and order_status IN (1, 2, 3, 4)
+         group by stores_id,pack_user_name
+         ) o
+        group by stores_id
+        order by stores_id
+    </select>
+
+    <select id="easyTitleName2" parameterType="Map" resultType="HashMap">
+        select pack_user_name packUserName,
+        (select name from cds_stores s where s.stores_id = o.stores_id) storesName,
+        stores_id storesId
+        from cds_order_info o
+        where pack_user_name is not null
+        and order_status IN (1, 2, 3, 4)
+            <if test="startday !=null and startday!=''">
+                AND o.create_date > #{startday}
+                AND o.create_date <![CDATA[<]]> #{endday} + ' 23:59:59'
+            </if>
+        <if test="stores_id != null and stores_id != '' ">
+            AND <![CDATA[ stores_id = #{stores_id} ]]>
+        </if>
+        group by pack_user_name,stores_id
+        order by stores_id
+    </select>
+
+
+    <select id="chargeSaveOrUpdate" parameterType="Map" resultType="HashMap">
+        <foreach collection="list" item="item">
+            if exists(select * from cds_change_type_list where stores_id = #{stores_id} and change_type = #{item.change_type})
+            update cds_change_type_list set money = #{item.money} where stores_id = #{stores_id} and change_type = #{item.change_type}
+            ELSE
+            insert into cds_change_type_list values(#{stores_id},#{name},#{item.change_type,#{item.money},getdate(),'','')
+        </foreach>
+
+    </select>
+
+    <update id="updateChargeType" parameterType="Map">
+        update cds_stores set charge_type = #{charge_type} where stores_id = #{stores_id}
+    </update>
+
+</mapper>

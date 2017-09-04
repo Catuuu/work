@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_role_menu">
+    <!--获取用户菜单-->
+    <select id="getUserMenu" parameterType="Map" resultType="HashMap">
+    <![CDATA[
+            select distinct menu.* from (
+            select id,parentid,app,model,action,name,status,listorder,app+'/'+model+'/'+action as rule_name,icon
+            from cds_menu
+            where parentid=#{parentid} and status=1) menu
+            left join cds_auth_access access on menu.rule_name = access.rule_name
+            left join cds_role role on access.role_id = role.id
+            left join cds_role_user ru on role.id = ru.role_id
+            where ru.user_id=#{user_id}
+            order by listorder
+        ]]>
+    </select>
+</mapper>

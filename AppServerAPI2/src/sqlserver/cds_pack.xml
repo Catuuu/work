@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_pack">
+
+    <!--查询微信打包消息推送的订单-->
+    <select id="getPackOrders" parameterType="java.util.List" resultType="CdsOrderInfo">
+        SELECT
+        o.order_id,
+        o.member_id,
+        o.brand_id,
+        o.total_price,
+        o.goods
+        FROM cds_order_info o
+        WHERE o.order_id IN
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item.order_id}
+        </foreach>
+    </select>
+
+    <!--流水线打包计件查询-->
+    <select id="packJob" parameterType="HashMap" resultType="HashMap">
+           SELECT
+        count(1) AS count,
+        order_date,
+        sc_name
+      FROM
+        (SELECT
+           isnull(o.pack_user_name, '未知') AS sc_name,
+           CONVERT(VARCHAR(100), o.create_date, 23) AS order_date
+         FROM cds_order_info o
+
+         WHERE  <![CDATA[ o.create_date >= #{startday} + ' 00:00:00'
+               AND o.create_date <= #{endday} + ' 23:59:59'
+                       ]]>
+            <if test="stores_id!='' and stores_id !=null">
+                AND stores_id = #{stores_id}
+            </if>
+	           AND o.order_status IN (1, 2, 3, 4)
+         UNION ALL
+
+         SELECT
+           isnull(o.pack_user_name, '未知') AS sc_name,
+           CONVERT(VARCHAR(100), o.create_date, 23) AS order_date
+         FROM view_cds_order_info o
+
+          WHERE  <![CDATA[ o.create_date >= #{startday} + ' 00:00:00'
+               AND o.create_date <= #{endday} + ' 23:59:59'
+               ]]>
+            <if test="stores_id!='' and stores_id !=null">
+                AND stores_id = #{stores_id}
+            </if>
+               AND o.order_status IN (1, 2, 3, 4)
+               ) temp
+      GROUP BY   temp.sc_name, temp.order_date with cube
+
+    </select>
+
+
+
+</mapper>

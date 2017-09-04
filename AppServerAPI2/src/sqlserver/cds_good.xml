@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_good">
+        <!--商品统计-->
+        <select id="getReportGood" parameterType="Map" resultType="HashMap">
+
+            select temp.class_good_name,
+            SUM(good_count) as good_count,
+            sum(good_price) as good_price
+            from (
+                select class_good_name,
+                SUM(count) as good_count,
+                SUM(price) as good_price
+                from cds_ms_goods_list
+            <![CDATA[
+                WHERE  sale_time >= #{startday}
+                AND sale_time <= #{endday} + ' 23:59:59']]>
+            <if test="stores_id!='' and stores_id !=null">
+                AND stores_id = #{stores_id}
+            </if>
+                and class_good_name is not null
+                group by class_good_name
+                union all
+                select class_good_name,
+                SUM(count) as good_count,
+                SUM(price) as good_price
+                from view_cds_ms_goods_list
+            <![CDATA[
+                WHERE  create_date >= #{startday}
+                AND create_date <= #{endday} + ' 23:59:59']]>
+            <if test="stores_id!='' and stores_id !=null">
+                AND stores_id = #{stores_id}
+            </if>
+            and class_good_name is not null
+                group by class_good_name
+            ) temp
+            group by temp.class_good_name
+        <if test="ordertype !=null and ordertype == 1">
+            <![CDATA[ order by good_count desc ]]>
+        </if>
+        <if test="ordertype !=null and ordertype == 2">
+            <![CDATA[ order by good_price desc ]]>
+        </if>
+    </select>
+
+
+
+    <!--菜品分析    数据调整,已不使用-->
+    <select id="getReportAnalyse" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select good_name,
+            sum(sum_count) as sum_count,
+            sum(good_count_8) as good_count_8,
+            sum(good_count_9) as good_count_9,
+            sum(good_count_10) as good_count_10,
+            sum(good_count_11) as good_count_11,
+            sum(good_count_12) as good_count_12,
+            sum(good_count_13) as good_count_13,
+            sum(good_count_14) as good_count_14,
+            sum(good_count_15) as good_count_15,
+            sum(good_count_16) as good_count_16,
+            sum(good_count_17) as good_count_17,
+            sum(good_count_18) as good_count_18,
+            sum(good_count_19) as good_count_19,
+            sum(good_count_20) as good_count_20,
+            sum(good_count_21) as good_count_21,
+            sum(good_count_22) as good_count_22,
+            sum(good_count_23) as good_count_23
+
+            from (
+                select isnull(temp.good_name,'合计') as good_name,
+                    SUM(case when t_hour=8 then count else 0 end ) as good_count_8,
+                    SUM(case when t_hour=9 then count else 0 end ) as good_count_9,
+                    SUM(case when t_hour=10 then count else 0 end ) as good_count_10,
+                    SUM(case when t_hour=11 then count else 0 end ) as good_count_11,
+                    SUM(case when t_hour=12 then count else 0 end ) as good_count_12,
+                    SUM(case when t_hour=13 then count else 0 end ) as good_count_13,
+                    SUM(case when t_hour=14 then count else 0 end ) as good_count_14,
+                    SUM(case when t_hour=15 then count else 0 end ) as good_count_15,
+                    SUM(case when t_hour=16 then count else 0 end ) as good_count_16,
+                    SUM(case when t_hour=17 then count else 0 end ) as good_count_17,
+                    SUM(case when t_hour=18 then count else 0 end ) as good_count_18,
+                    SUM(case when t_hour=19 then count else 0 end ) as good_count_19,
+                    SUM(case when t_hour=20 then count else 0 end ) as good_count_20,
+                    SUM(case when t_hour=21 then count else 0 end ) as good_count_21,
+					SUM(case when t_hour=22 then count else 0 end ) as good_count_22,
+					SUM(case when t_hour=23 then count else 0 end ) as good_count_23,
+                    sum(count) as sum_count
+                from (
+                    select cgl.sale_time,
+                           convert(int,datename(Hour, cgl.sale_time)) as t_hour,
+                           cgl.class_good_name as good_name,
+                           cgl.count
+                    from cds_ms_goods_list cgl
+                    where cgl.sale_time >=#{startday}
+                    and cgl.sale_time <=#{endday}  + ' 23:59:59'
+                    and cgl.stores_id = #{stores_id}
+                    and class_good_name is not null
+                ) temp group by good_name with rollup
+
+				union all
+				 select isnull(temp.good_name,'合计') as good_name,
+                    SUM(case when t_hour=8 then count else 0 end ) as good_count_8,
+                    SUM(case when t_hour=9 then count else 0 end ) as good_count_9,
+                    SUM(case when t_hour=10 then count else 0 end ) as good_count_10,
+                    SUM(case when t_hour=11 then count else 0 end ) as good_count_11,
+                    SUM(case when t_hour=12 then count else 0 end ) as good_count_12,
+                    SUM(case when t_hour=13 then count else 0 end ) as good_count_13,
+                    SUM(case when t_hour=14 then count else 0 end ) as good_count_14,
+                    SUM(case when t_hour=15 then count else 0 end ) as good_count_15,
+                    SUM(case when t_hour=16 then count else 0 end ) as good_count_16,
+                    SUM(case when t_hour=17 then count else 0 end ) as good_count_17,
+                    SUM(case when t_hour=18 then count else 0 end ) as good_count_18,
+                    SUM(case when t_hour=19 then count else 0 end ) as good_count_19,
+                    SUM(case when t_hour=20 then count else 0 end ) as good_count_20,
+                    SUM(case when t_hour=21 then count else 0 end ) as good_count_21,
+					SUM(case when t_hour=22 then count else 0 end ) as good_count_22,
+					SUM(case when t_hour=23 then count else 0 end ) as good_count_23,
+                    sum(count) as sum_count
+                from (
+                    select cgl.sale_time,
+                           convert(int,datename(Hour, cgl.sale_time)) as t_hour,
+                           cgl.class_good_name as good_name,
+                           cgl.count
+                    from view_cds_ms_goods_list cgl
+                    where cgl.create_date >=#{startday}
+                    and cgl.create_date <=#{endday}  + ' 23:59:59'
+                    and cgl.stores_id = #{stores_id}
+                    and class_good_name is not null
+                ) temp group by good_name with rollup
+
+             ) t
+			 group by good_name
+			 order by sum_count desc
+        ]]>
+    </select>
+
+
+    <select id="getEditReportAnalyse" parameterType="Map" resultType="HashMap">
+            select good_name,
+        <foreach item="item" collection="list" separator="" index="index">
+            cast(cast(sum(good_count_${index}) as FLOAT)/#{days} as numeric(8,2))  good_count_${index},
+        </foreach>
+        cast(cast(sum(sum_count) as FLOAT)/#{days} as numeric(8,2)) sum_count
+            from (
+                select isnull(temp.good_name,'合计') as good_name,
+                <foreach item="item" collection="list" separator="" index="index">
+                    SUM(case when t_minute>=#{item.mix} AND t_minute <![CDATA[<]]> #{item.max} then count else 0 end ) as good_count_${index},
+                </foreach>
+                    sum(case when t_minute>=#{startTime} AND t_minute <![CDATA[<]]> #{endTime} then count else 0 end) as sum_count
+                from (
+                    select cgl.sale_time,
+                           convert(int,datename(Hour , cgl.sale_time))*60 + convert(int,datename(minute, cgl.sale_time)) as t_minute,
+                           cgl.class_good_name as good_name,
+                           cgl.count
+                    from cds_ms_goods_list cgl
+                    where cgl.sale_time >=#{startday}
+                    and cgl.sale_time <![CDATA[<=]]>#{endday}  + ' 23:59:59'
+                    <if test="stores_id != null and stores_id != '' ">
+                        <![CDATA[and cgl.stores_id = #{stores_id} ]]>
+                    </if>
+                    and class_good_name is not null
+                ) temp group by good_name with rollup
+
+				union all
+				 select isnull(temp.good_name,'合计') as good_name,
+                <foreach item="item" collection="list" separator="" index="index">
+                    SUM(case when t_minute>=#{item.mix} AND t_minute <![CDATA[<]]> #{item.max} then count else 0 end ) as good_count_${index},
+                </foreach>
+                    sum(case when t_minute>=#{startTime} AND t_minute <![CDATA[<]]> #{endTime} then count else 0 end) as sum_count
+                from (
+                    select cgl.sale_time,
+                           convert(int,datename(Hour, cgl.sale_time))*60 + convert(int,datename(minute, cgl.sale_time)) as t_minute,
+                           cgl.class_good_name as good_name,
+                           cgl.count
+                    from view_cds_ms_goods_list cgl
+                    where cgl.create_date >=#{startday}
+                    and cgl.create_date <![CDATA[<=]]>#{endday}  + ' 23:59:59'
+                    <if test="stores_id != null and stores_id != '' ">
+                        <![CDATA[and cgl.stores_id = #{stores_id} ]]>
+                    </if>
+                    and class_good_name is not null
+                ) temp group by good_name with rollup
+             ) t
+			 group by good_name
+			 order by sum_count desc
+    </select>
+
+    <!--菜品日分析-->
+    <select id="getReportAnalyseDays" parameterType="Map" resultType="HashMap">
+        select isnull(good_name,'合计') good_name,
+        <foreach item="item" collection="list" separator="" index="index">
+            SUM(case when sale_time = #{item} then count else 0 end ) as 'count${index}',
+            SUM(case when sale_time = #{item} then price else 0 end ) as 'price${index}',
+        </foreach>
+        SUM(count) 'count',
+        SUM(price) 'price'
+        from (
+        select Convert(varchar(10),sale_time,120) sale_time,price,good_name,stores_id,count from cds_ms_goods_list goods
+        where
+        <![CDATA[goods.sale_time >= #{startday} and goods.sale_time <= #{endday} + ' 23:59:59'  ]]>
+        union ALL
+        select Convert(varchar(10),sale_time,120) sale_time,price,good_name,stores_id,count from view_cds_ms_goods_list goods
+        where
+        <![CDATA[goods.create_date >= #{startday} and goods.create_date <= #{endday}+ ' 23:59:59'  ]]>
+        ) goods
+        <if test="stores_id != null and stores_id != '' ">
+            where
+            <![CDATA[ stores_id = #{stores_id} ]]>
+        </if>
+        group by good_name with rollup
+        order by count DESC
+    </select>
+
+
+    <insert id="insertBatGoodRecord" parameterType="List">
+
+        <foreach item="item" collection="list" separator="">
+            INSERT INTO cds_ms_goods_list(good_list_id,stores_id,order_id,class_id,good_id,good_name,class_good_name,standard_id,standard_name,sale_time,price,count,listorder,cm_id,brand_id)
+            VALUES(#{item.good_list_id},#{item.stores_id},#{item.order_id},#{item.class_id},#{item.good_id},#{item.good_name},#{item.class_good_name},#{item.standard_id},#{item.standard_name},#{item.sale_time},#{item.price},#{item.count},#{item.listorder},#{item.cm_id},#{item.brand_id})
+        </foreach>
+    </insert>
+
+    <insert id="insertBatNosetGoodsList" parameterType="List">
+        <foreach item="item" collection="list" separator="">
+            INSERT INTO cds_noset_goods_list(ngl_id,order_id,good_name,good_info,create_date,stores_id,brand_id)
+            VALUES(#{item.ngl_id},#{item.order_id},#{item.good_name},#{item.good_info},#{item.create_date},#{item.stores_id},#{item.brand_id})
+        </foreach>
+    </insert>
+</mapper>

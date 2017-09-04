@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_chufan_task">
+    <!--获取出餐机中生产中任务-->
+    <select id="getTaskGoods" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+          select gt.*,DATEDIFF(minute,gt.createtime,getdate()) as use_time,mg.out_time,mg.finished_weight
+            from cds_goods_task gt
+            left join cds_ms_goods mg on gt.good_id = mg.good_id
+            where gt.createtime> CONVERT(varchar(100), GETDATE(), 23)
+            and gt.task_status=1
+            and gt.cm_id=#{cm_id}
+            order by gt.createtime
+        ]]>
+    </select>
+
+    <!--获取未处理的接单机任务-->
+    <select id="doningTaskRecord" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select
+            gtr.gtr_status as message_type,
+            gt.task_num, gt.meal_num,gtr.tar_id,gtr.good_name,gtr.good_count,gtr.createtime,gtr.before_good_count,gtr.after_good_count
+            from cds_goods_task_record gtr
+            left join cds_goods_task gt on gtr.task_id = gt.task_id
+            where gtr.createtime>CONVERT(varchar(100), GETDATE(), 23)
+            and gtr.cm_id=#{cm_id}
+            and gtr.is_do=0
+            and gtr.gtr_status in (1,2)
+            order by createtime
+        ]]>
+    </select>
+
+
+    <!--获取操作记录-->
+    <select id="getProductionList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+           select gtr.tar_id,
+           gt.meal_num,
+           gtr.good_name,
+           gtr.good_count,
+           gtr.createtime,
+           mg.out_time,
+           mg.finished_weight,
+           gtr.is_do
+           from cds_goods_task_record gtr
+           left join cds_goods_task gt on gtr.task_id = gt.task_id
+           left join cds_ms_goods mg on gt.good_id = mg.good_id
+           where gtr.createtime>CONVERT(varchar(100), GETDATE(), 23)
+           and gtr.cm_id = #{cm_id}
+           and gtr.gtr_status = 3
+           order by gtr.createtime desc
+        ]]>
+    </select>
+
+    <!--获取下达记录-->
+    <select id="recordList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+
+            select cgt.*,ccm.ct_num from cds_goods_task cgt
+            left join cds_chufan_meal ccm on cgt.cm_id = ccm.cm_id
+            where cgt.createtime>CONVERT(varchar(100), GETDATE(), 23)
+            and cgt.cm_id=#{cm_id}
+            order by task_num desc
+        ]]>
+    </select>
+
+
+    <!--获取操作记录明细-->
+    <select id="taskrecordList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+
+            select cm.ct_num,gtr.good_count,gtr.createtime,gtr.gtr_status
+            from cds_goods_task_record gtr
+            left join cds_chufan_meal cm on gtr.cm_id = cm.cm_id
+            where task_id=#{task_id}
+            order by gtr.createtime
+
+        ]]>
+    </select>
+
+
+
+    <!--报表数据查看-->
+    <select id="reportList" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select mg.good_name,
+            (select isnull(sum(count),0) from cds_ms_goods_list where good_id= cmg.good_id and stores_id=#{stores_id} and sale_time>CONVERT(varchar(100), GETDATE(), 23)) as count1,
+            (select isnull(sum(finsh_count),0) from cds_goods_task where good_id= cmg.good_id and stores_id=#{stores_id} and task_status in (1,2) and createtime>CONVERT(varchar(100), GETDATE(), 23)) as count2,
+            (select isnull(sum(good_count),0)-isnull(sum(finsh_count),0) from cds_goods_task where good_id= cmg.good_id  and task_status in (1,2) and stores_id=#{stores_id} and createtime>CONVERT(varchar(100), GETDATE(), 23)) as count3
+            from cds_chufan_meal_goods cmg
+            left join cds_chufan_meal cm on cmg.cm_id = cm.cm_id
+            left join cds_ms_goods mg on cmg.good_id = mg.good_id
+            where cm.stores_id=#{stores_id}
+            and cm.cm_id = #{cm_id}
+            and cm.status=1
+            order by good_name desc
+        ]]>
+    </select>
+
+
+</mapper>

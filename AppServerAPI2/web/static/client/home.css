@@ -1,0 +1,129 @@
+﻿ body{
+    margin-bottom:10px;
+}
+#order {
+    margin:10px ;
+}
+
+#order .project{
+    width:86%;
+    margin:0px auto;
+}
+#order .order_item {
+    background: #fff;
+}
+
+#order .order_item .title {
+    border-bottom: 1px solid #d6d6d6;
+    height: 31px;
+    line-height: 31px;
+    margin: 5px auto;
+    width: 94%;
+}
+
+#order .order_item .title span {
+    float: left;
+}
+
+#order .order_item .title a {
+    float: right;
+    color: #000;
+    text-decoration: none;
+}
+
+#order .order_left {
+    width: 50%;
+    height: 195px;
+    float: left;
+}
+
+#order .order_right {
+    width: 49%;
+    height: 195px;
+    float: right;
+}
+
+#order .project_item {
+    float: left;
+    padding: 0px 4%;
+    text-align: center;
+    border-right: 1px dashed #ccc;
+    margin-top: 32px;
+}
+
+#order .project_item span {
+    display: inline-block;
+    font-size: 43px;
+    font-weight: bold;
+    color: #d6d6d6;
+}
+
+#order .project_item .new {
+    color: #c30d23;
+}
+
+ #order .project_item .old {
+     color: #5f5f5f;
+ }
+ #order .project_item .cancel {
+     color: #8f8f8f;
+ }
+
+#order .project_item .feedback {
+    color: #ffcc00;
+}
+
+#order .last {
+    border: none;
+}
+
+.order_bottom {
+    background: #fff;
+    margin: 10px 10px 0px;
+    padding: 20px;
+}
+
+.order_bottom .order_info {
+    width: 100%;
+}
+
+.order_bottom .order_info .info_item {
+    border: 1px solid #d8d8d8;
+    padding: 10px;
+}
+
+.order_bottom .order_info h3 {
+    color: #3281b0;
+    margin: 10px 0px 10px 0px;
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.order_bottom .order_info .item {
+    padding: 10px 7px;
+    width: 18%;
+    float: left;
+    text-align: center;
+    border-right: 1px dashed #ccc;
+}
+
+    .order_bottom .order_info .itemlast {
+    padding: 10px 7px;
+    width: 18%;
+    float: left;
+    text-align: center;
+    border-right: 0px solid #ccc;
+}
+
+.order_bottom .info_item h4{
+    color:#808080;
+}
+.order_bottom .info_item p.cur{
+    font-size: 24px;
+    font-weight: bold;
+    color: #676767;
+}
+
+.order_bottom .info_item p{
+    color:#454545;
+}

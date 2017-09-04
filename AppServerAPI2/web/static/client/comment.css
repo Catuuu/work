@@ -1,0 +1,138 @@
+﻿#main {
+    margin: 1%;
+    width: 98%;
+}
+
+#main .main_title {
+    border: 1px solid #d2d2d2;
+    height: 60px;
+    line-height: 60px;
+    padding: 0px 20px;
+}
+
+#main .main_title p {
+    display: inline-block;
+}
+
+#main .main_title label {
+    color: #a7a7a7;
+}
+
+#main .title_left {
+    float: left;
+    height: 60px;
+    line-height: 60px;
+}
+
+#main .title_left p {
+    height: 60px;
+    line-height: 60px;
+    margin: 0px;
+}
+
+#main .title_left .check_color {
+    color: #c30d23;
+}
+
+#main .title_right {
+    float: right;
+}
+
+#main .main_content {
+    background: #fff;
+    padding: 20px 20px;
+    border-bottom: 1px dashed #ccc;
+}
+
+#main .main_content p {
+    height: 46px;
+    line-height: 46px;
+}
+
+#main .main_content i {
+    display: inline-block;
+    color: #a7a7a7;
+}
+
+#main .main_content .main_star {
+    height: 46px;
+    line-height: 46px;
+}
+
+#main .main_content .good {
+    color: #c30d23;
+}
+
+#main .main_content .stars {
+    float: left;
+}
+
+#main .main_content .order_info {
+    float: right;
+}
+
+#main .main_content .order_info .order_time {
+    margin-left: 10px;
+}
+
+#main .main_content .order_info .order_code {
+    margin-left: 10px;
+}
+
+#main .main_content form {
+    height: 220px;
+    background: #f6f6f7;
+    display: none;
+}
+
+#main .main_content form textarea {
+    width: 1277px;
+    margin: 2%;
+    height: 100px;
+    resize: none;
+    outline: none;
+    padding: 10px;
+}
+
+#main .main_content form .submit {
+    float: right;
+    margin: -10px 32px 0px 0px;
+}
+
+#main .main_content form .submit .abtn {
+    float: left;
+    color: #000;
+    display: block;
+    width: 92px;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    border: 1px solid #c4c4c4;
+    cursor: pointer;
+}
+
+#main .main_content form .submit .submitno {
+    margin-right: 20px;
+}
+
+#main .main_content form .submit .submitgo {
+    background: #f6f6f7;
+}
+
+#main .main_content .content {
+    position: relative;
+}
+
+#main .main_content .tell_user {
+    display: block;
+    width: 92px;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    border: 1px solid #c4c4c4;
+    cursor: pointer;
+    color: #000;
+    right: 32px;
+    position: absolute;
+    top: 0px;
+}

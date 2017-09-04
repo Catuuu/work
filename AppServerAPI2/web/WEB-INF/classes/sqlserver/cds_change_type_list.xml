@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_change_type_list">
+
+    <!--<select id="saveOrUpdate" parameterType="Map">-->
+        <!--<foreach collection="list" item="item">-->
+            <!--if exists(select * from cds_change_type_list where stores_id = #{stores_id} and change_type = #{item.change_type})-->
+            <!--update cds_change_type_list set money = #{item.money} where stores_id = #{stores_id} and change_type = #{item.change_type}-->
+            <!--ELSE-->
+            <!--insert into cds_change_type_list values(#{stores_id},#{name},#{item.change_type},#{item.money},getdate(),'','')-->
+        <!--</foreach>-->
+    <!--</select>-->
+
+</mapper>

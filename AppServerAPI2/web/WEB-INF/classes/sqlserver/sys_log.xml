@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sys_log">
+    <sql id="pageWhere">
+        <where>
+            <if test="formInfo.sl_date_begin != null and formInfo.sl_date_begin != '' ">
+                <![CDATA[ sl_date >= #{formInfo.sl_date_begin} ]]>
+            </if>
+            <if test="formInfo.sl_date_end != null and formInfo.sl_date_end != '' ">
+                <![CDATA[ AND sl_date <= #{formInfo.sl_date_end} + ' 23:59:59'  ]]>
+            </if>
+            <if test="formInfo.sl_username != null and formInfo.sl_username != '' ">
+                <![CDATA[ AND sl_username LIKE '%'+#{formInfo.sl_username}+'%']]>
+            </if>
+            <if test="formInfo.sl_usercode !=null and formInfo.sl_usercode != ''">
+                <![CDATA[ AND sl_usercode LIKE '%'+#{formInfo.sl_usercode}+'%']]>
+            </if>
+            <if test="formInfo.sl_table != null and formInfo.sl_table != ''">
+                <![CDATA[ AND sl_table LIKE '%'+#{formInfo.sl_table}+'%']]>
+            </if>
+            <if test="formInfo.sl_content != null and formInfo.sl_content != ''">
+                <![CDATA[ AND sl_content LIKE '%'+#{formInfo.sl_content}+'%']]>
+            </if>
+        </where>
+    </sql>
+
+    <select id="getPageRecord" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            SELECT
+                sl_id,
+                sl_date,
+                sl_usercode,
+                sl_username,
+                sl_table,
+                sl_content
+            FROM sys_log
+          ]]>
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="getPageCount" parameterType="PageParam" resultType="Integer">
+        <![CDATA[ SELECT COUNT(1) FROM sys_log ]]>
+        <include refid="pageWhere"/>
+    </select>
+
+   <!-- <insert id="insertRecord" parameterType="SysLog">
+        <![CDATA[
+            insert into sys_log(
+                sl_id,
+                sl_date,
+                sl_usercode,
+                sl_username,
+                sl_table,
+                sl_content
+            ) values(
+                #{sl_id},
+                #{sl_date},
+                #{sl_usercode},
+                #{sl_username},
+                #{sl_table},
+                #{sl_content}
+            )
+        ]]>
+    </insert>-->
+</mapper>

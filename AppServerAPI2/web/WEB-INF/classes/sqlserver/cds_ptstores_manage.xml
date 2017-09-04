@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cds_ptstores_manage">
+    <!--获取品牌对应门店信息-->
+    <select id="GetStoresTree" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+               select (c.stores_id)as id ,(c.name)as text,'icon icon-367' as iconCls, a.elem_restaurant_id,a.meituan_restaurant_id,a.stores_brand_id from cds_stores_brand a
+               left join cds_brand b on a.brand_id=b.brand_id
+               left join cds_stores c on a.stores_id=c.stores_id
+               where a.brand_id = #{brand_id}
+        ]]>
+    </select>
+
+
+    <!--cds_stores_goods_list  商铺包含商品明细-->
+    <select id="GetStoresGoodsList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+              select  a.sgl_id,
+              b.good_name,
+              b.image_hash,
+              b.good_pic,
+              a.stores_brand_id,
+              b.good_info,
+              a.mt_isband,
+              d.food_category_id,
+              d.meituan_cat_id,
+              a.food_id,
+              c.class_name,
+              a.elem_count,
+              a.mt_count,
+              a.wx_count,
+              a.all_count,
+              a.market_price,
+              a.unit,
+              a.box_price,
+              a.box_count,
+              a.status
+              from cds_stores_goods_list a
+              left join cds_goods_info b on a.good_id=b.good_id
+              left join cds_class c on b.class_id=c.class_id
+              left join cds_stores_class d on c.class_id=d.class_id and a.stores_brand_id=d.stores_brand_id and b.class_id=d.class_id
+        ]]>
+        <where>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' ">
+                <![CDATA[
+                         a.brand_id = #{formInfo.brand_id}
+
+                ]]>
+            </if>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[
+                    AND (
+                         a.stores_id = #{formInfo.stores_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.class_id != null and formInfo.class_id != '' ">
+                <![CDATA[
+                    AND (
+                         c.class_id = #{formInfo.class_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.good_id != null and formInfo.good_id != '' ">
+                <![CDATA[
+                    AND (
+                         a.good_id = #{formInfo.good_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.sgl_id != null and formInfo.sgl_id != '' ">
+                <![CDATA[
+                    AND (
+                         a.sgl_id = #{formInfo.sgl_id}
+                      )
+                ]]>
+            </if>
+        </where>
+    </select>
+
+
+    <!--cds_stores_class  分类List-->
+    <select id="GetGoodsClassList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+              select
+              a.stores_class_id,
+              a.class_desc,
+              c.class_id,
+              c.class_name,
+              c.listorder,
+              a.stores_brand_id,
+              b.stores_id,
+              b.elem_restaurant_id,
+              b.meituan_restaurant_id,
+              a.type,
+              c.brand_id,
+              d.name,
+              a.food_category_id,
+              a.meituan_cat_id
+              from cds_stores_class a
+              left join cds_stores_brand b on a.stores_brand_id = b.stores_brand_id
+              left join cds_class c on a.class_id = c.class_id
+              left join cds_stores d on b.stores_id=d.stores_id
+        ]]>
+        <where>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' ">
+                <![CDATA[
+                         b.brand_id = #{formInfo.brand_id}
+
+                ]]>
+            </if>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[
+                    AND (
+                         b.stores_id = #{formInfo.stores_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.stores_class_id != null and formInfo.stores_class_id != '' ">
+                <![CDATA[
+                    AND (
+                         a.stores_class_id = #{formInfo.stores_class_id}
+                      )
+                ]]>
+            </if>
+            <!--<if test="formInfo.good_id != null and formInfo.good_id != '' ">-->
+                <!--<![CDATA[-->
+                    <!--AND (-->
+                         <!--a.good_id = #{formInfo.good_id}-->
+                      <!--)-->
+                <!--]]>-->
+            <!--</if>-->
+        </where>
+    </select>
+
+    <!--cds_stores_class  分类List-->
+    <select id="GetClassList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+              select * from cds_class
+        ]]>
+        <where>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' ">
+                <![CDATA[
+                         brand_id = #{formInfo.brand_id}
+
+                ]]>
+            </if>
+            <if test="formInfo.ids != null  and formInfo.ids !='and class_id not in (' ">
+                <![CDATA[
+                    ${formInfo.ids}
+                 ]]>
+                <!--and class_id not in-->
+                <!--<foreach collection="(formInfo.list)" item="item"  open="(" separator="," close=")">-->
+                    <!--#{item.class_id}-->
+                <!--</foreach>-->
+            </if>
+
+            <if test="formInfo.class_name != null and formInfo.class_name != '' ">
+                <![CDATA[
+                    AND (
+                         class_name LIKE '%'+#{formInfo.class_name}+'%'
+                      )
+                ]]>
+            </if>
+
+        </where>
+    </select>
+
+
+
+
+    <!--cds_stores_class门店类别明细状态-->
+    <select id="updateStoresClassType" parameterType="CdsStoresClass" resultType="HashMap">
+        <![CDATA[
+            update cds_stores_class set  type =0 where class_id=#{class_id}
+        ]]>
+    </select>
+
+
+    <!--cds_stores_class删除门店类别明细-->
+    <select id="deleteClass" parameterType="CdsStoresClass" resultType="HashMap">
+        <![CDATA[
+            delete from cds_stores_class  where stores_class_id=#{stores_class_id}
+        ]]>
+    </select>
+
+
+
+    <!--cds_stores_class  分类List-->
+    <select id="getStoresGoodsClass" parameterType="CdsStoresBrand" resultType="HashMap">
+        <![CDATA[
+              select
+              a.stores_class_id,
+              c.class_id,
+              c.class_name,
+              c.listorder,
+              a.stores_brand_id,
+              b.elem_restaurant_id,
+              b.meituan_restaurant_id,
+              a.type,
+              c.brand_id,
+              d.name,
+              a.food_category_id,
+              a.meituan_cat_id
+              from cds_stores_class a
+              left join cds_stores_brand b on a.stores_brand_id = b.stores_brand_id
+              left join cds_class c on a.class_id = c.class_id
+              left join cds_stores d on b.stores_id=d.stores_id
+        ]]>
+        <where>
+            <if test="brand_id != null and brand_id != '' ">
+                <![CDATA[
+                         b.brand_id = #{brand_id}
+
+                ]]>
+            </if>
+            <if test="stores_id != null and stores_id != '' ">
+                <![CDATA[
+                    AND (
+                         b.stores_id = #{stores_id}
+                      )
+                ]]>
+            </if>
+            <!--<if test="formInfo.class_id != null and formInfo.class_id != '' ">-->
+            <!--<![CDATA[-->
+            <!--AND (-->
+            <!--c.class_id = #{formInfo.class_id}-->
+            <!--)-->
+            <!--]]>-->
+            <!--</if>-->
+            <!--<if test="formInfo.good_id != null and formInfo.good_id != '' ">-->
+            <!--<![CDATA[-->
+            <!--AND (-->
+            <!--a.good_id = #{formInfo.good_id}-->
+            <!--)-->
+            <!--]]>-->
+            <!--</if>-->
+        </where>
+    </select>
+
+
+    <!--cds_stores_class删除门店类别明细-->
+    <select id="getGoodTree" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select (a.sgl_id)as id,(d.good_name)as text,d.market_price,d.good_info,a.elem_count,a.box_price,a.food_id from cds_stores_goods_list a
+            left join cds_stores_brand b on a.stores_brand_id = b.stores_brand_id and a.stores_id= b.stores_id
+            left join cds_stores_class c on c.stores_brand_id = a.stores_brand_id
+            left join cds_goods_info d on a.good_id = d.good_id and c.class_id = d.class_id
+            where b.brand_id=#{brand_id} and b.stores_id=#{stores_id} and c.food_category_id=#{food_category_id} and c.class_id=#{class_id} and d.good_name is not null
+        ]]>
+    </select>
+
+    <!--cds_stores_class删除门店类别明细-->
+    <select id="getMtGoodTree" parameterType="Map" resultType="HashMap">
+        <![CDATA[
+            select (a.sgl_id)as id,(d.good_name)as text,d.market_price,d.good_info,a.status,a.mt_isband from cds_stores_goods_list a
+            left join cds_stores_brand b on a.stores_brand_id = b.stores_brand_id and a.stores_id= b.stores_id
+            left join cds_stores_class c on c.stores_brand_id = a.stores_brand_id
+            left join cds_goods_info d on a.good_id = d.good_id and c.class_id = d.class_id
+            where b.brand_id=#{brand_id} and b.stores_id=#{stores_id} and c.meituan_cat_id=#{meituan_cat_id} and c.class_id=#{class_id} and d.good_name is not null
+        ]]>
+    </select>
+
+
+    <select id="getClassTree" parameterType="CdsStoresBrand" resultType="HashMap">
+        <![CDATA[
+           select (a.stores_class_id)as id ,(a.class_name)as text,'icon icon-367' as iconCls,b.stores_id from cds_stores_class a left join cds_stores_brand b on a.stores_brand_id = b.stores_brand_id
+        ]]>
+        <where>
+            <if test="brand_id != null and brand_id != '' ">
+                <![CDATA[
+                         b.brand_id = #{brand_id}
+
+                ]]>
+            </if>
+            <if test="stores_id != null and stores_id != '' ">
+                <![CDATA[
+                    AND (
+                         b.stores_id = #{stores_id}
+                      )
+                ]]>
+            </if>
+        </where>
+        order by a.listorder
+    </select>
+
+
+
+    <!--cds_stores_goods_list  商铺包含商品明细-->
+    <select id="getGoodsList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+             select b.meituan_cat_id,b.food_category_id,d.brand_name,(c.stores_id)as st_id,(d.brand_id)as bd_id,f.name,b.stores_class_id as class_id,b.class_name,a.* from cds_stores_goods_list a
+              left join cds_stores_class b on a.stores_class_id = b.stores_class_id
+              left join cds_stores_brand c on a.stores_brand_id = c.stores_brand_id
+              left join cds_brand d on c.brand_id = d.brand_id
+              left join cds_stores f on c.stores_id = f.stores_id
+        ]]>
+        <where>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' ">
+                <![CDATA[
+                        c.brand_id = #{formInfo.brand_id}
+
+                ]]>
+            </if>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[
+                    AND (
+                         c.stores_id = #{formInfo.stores_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.stores_brand_id != null and formInfo.stores_brand_id != '' ">
+                <![CDATA[
+                    AND (
+                         c.stores_brand_id = #{formInfo.stores_brand_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.stores_class_id != null and formInfo.stores_class_id != '' ">
+                <![CDATA[
+                    AND (
+                         b.stores_class_id = #{formInfo.stores_class_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.good_name != null and formInfo.good_name != '' ">
+                <![CDATA[
+                    AND (
+                         a.good_name LIKE '%'+#{formInfo.good_name}+'%'
+                      )
+                ]]>
+            </if>
+
+        </where>
+    </select>
+
+
+    <select id="getGoodsClassList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+             select b.stores_brand_id as sb_id,b.stores_name,b.elem_restaurant_id,b.stores_id,b.brand_id as bd_id,a.* from cds_stores_class a left join cds_stores_brand b on a.stores_brand_id = b.stores_brand_id
+        ]]>
+        <where>
+            <if test="formInfo.brand_id != null and formInfo.brand_id != '' ">
+                <![CDATA[
+                         b.brand_id = #{formInfo.brand_id}
+
+                ]]>
+            </if>
+            <if test="formInfo.stores_id != null and formInfo.stores_id != '' ">
+                <![CDATA[
+                    AND (
+                         b.stores_id = #{formInfo.stores_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.stores_brand_id != null and formInfo.stores_brand_id != '' ">
+                <![CDATA[
+                    AND (
+                         b.stores_brand_id = #{formInfo.stores_brand_id}
+                      )
+                ]]>
+            </if>
+            <if test="formInfo.class_name != null and formInfo.class_name != '' ">
+                <![CDATA[
+                    AND (
+                         a.class_name LIKE '%'+#{formInfo.class_name}+'%'
+                      )
+                ]]>
+            </if>
+
+        </where>
+    </select>
+
+
+    <select id="getStoresCombobox" parameterType="CdsBrand" resultType="HashMap">
+        <![CDATA[
+           select  (b.stores_brand_id) as id ,(a.name) as text,'icon icon-367' as iconCls,(a.stores_id) as s_id  from cds_stores a left join cds_stores_brand b on a.stores_id = b.stores_id where b.brand_id = #{brand_id}
+        ]]>
+    </select>
+
+    <!--查询数据库最大的商品id-->
+    <select id="queryGoodId" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select  max(sgl_id) AS sgl_id from cds_stores_goods_list
+        ]]>
+    </select>
+
+
+    <!--查询数据库最大的规格id-->
+    <select id="queryStandardId" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select  max(standard_id) AS standard_id from cds_standard_list
+        ]]>
+    </select>
+
+
+    <!-- 查询规格-->
+    <select id="getStandardList" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+             select * from cds_standard_list
+        ]]>
+        <where>
+            <if test="formInfo.sgl_id != null and formInfo.sgl_id != '' ">
+                <![CDATA[
+                         sgl_id = #{formInfo.sgl_id}
+                ]]>
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 查询规格-->
+    <select id="getStandardGoods" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+             select b.class_id,b.good_name,a.* from cds_standard_good_list a left join cds_ms_goods b on a.good_id= b.good_id
+        ]]>
+        <where>
+            <if test="formInfo.standard_id != null and formInfo.standard_id != '' ">
+                <![CDATA[
+                         a.standard_id = #{formInfo.standard_id}
+                ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="deleteGood" parameterType="PageParam" resultType="CdsStoresGoodsList">
+        <![CDATA[
+            delete  from cds_standard_list where sgl_id = #{sgl_id}
+        ]]>
+    </select>
+
+    <select id="deleteStandardGoodList" parameterType="PageParam" resultType="CdsStoresGoodsList">
+        <![CDATA[
+            delete from cds_standard_good_list where standard_id in ( select standard_id  from cds_standard_list where sgl_id =#{sgl_id} )
+        ]]>
+    </select>
+    <select id="deleteStandard" parameterType="PageParam" resultType="CdsStandardList">
+        <![CDATA[
+            delete from cds_standard_good_list where standard_id = #{standard_id}
+        ]]>
+    </select>
+
+    <select id="getClassTree2" parameterType="PageParam" resultType="HashMap">
+        <![CDATA[
+            select a.food_category_id,a.stores_class_id,a.class_name,d.brand_id,d.brand_name,c.stores_id,c.name from cds_stores_class a
+            left join cds_stores_brand b  on a.stores_brand_id = b.stores_brand_id
+            left join cds_stores c on b.stores_id = c.stores_id
+            left join cds_brand d on b.brand_id = d.brand_id
+
+        ]]>
+    </select>
+
+    <select id="getElemeClass" parameterType="CdsStoresBrand" resultType="HashMap">
+        <![CDATA[
+           select stores_class_id as id,class_name as text,food_category_id from cds_stores_class a
+            left join cds_stores_brand b on a.stores_brand_id = b.stores_brand_id
+            where food_category_id is NULL and b.brand_id =#{brand_id} and b.stores_id=#{stores_id}
+        ]]>
+    </select>
+
+    <select id="getMtClass" parameterType="CdsStoresBrand" resultType="HashMap">
+        <![CDATA[
+           select stores_class_id as id,class_name as text from cds_stores_class
+            where meituan_cat_id is NULL and stores_brand_id=#{stores_brand_id}
+        ]]>
+    </select>
+
+    <!--美团批量绑定-->
+    <select id="mtPlBind" parameterType="CdsStoresClass" resultType="HashMap">
+        <![CDATA[
+              update  cds_stores_goods_list SET mt_isband ='ok'
+        ]]>
+        <where>
+            <if test="class_desc != null  and class_desc !='and sgl_id in (' ">
+                <![CDATA[
+                    ${class_desc}
+                 ]]>
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="baseSqlMap">
+  
+    <select id="getRecord" parameterType="HashMap" resultType="HashMap">
+        <choose>
+            <when test="null != paramsList and paramsList.size > 0">
+                SELECT
+                <foreach item="item" collection="paramsList" separator=",">
+                    ${item.fieldName}
+                </foreach>
+                FROM ${tableName}
+            </when>
+            <otherwise>
+                SELECT * FROM ${tableName}
+            </otherwise>
+        </choose>
+
+
+        <where>
+            <foreach item="item" collection="conditionList" separator="and">
+                ${item.fieldName} = #{item.fieldValue}
+            </foreach>
+        </where>
+        <if test="orderStr != null">
+            ORDER BY ${orderStr}
+        </if>
+    </select>
+
+    <insert id="insertRecord" parameterType="HashMap">
+        INSERT INTO ${tableName}(
+        <foreach item="item" collection="paramsList" separator=",">
+            ${item.fieldName}
+        </foreach>
+        ) VALUES(
+        <foreach item="item" collection="paramsList" separator=",">
+            #{item.fieldValue}
+        </foreach>
+        )
+    </insert>
+
+    <update id="updateRecord" parameterType="HashMap">
+        UPDATE ${tableName}
+        <set>
+            <foreach item="item" collection="paramsList" separator=",">
+                ${item.fieldName} = #{item.fieldValue}
+            </foreach>
+        </set>
+        <where>
+            <foreach item="item" collection="conditionList" separator="and">
+                ${item.fieldName} = #{item.fieldValue}
+            </foreach>
+        </where>
+    </update>
+
+    <delete id="deleteRecord" parameterType="HashMap">
+         DELETE FROM ${tableName}
+        <where>
+            <foreach item="item" collection="conditionList" separator="and">
+                ${item.fieldName} = #{item.fieldValue}
+            </foreach>
+        </where>
+    </delete>
+</mapper>
